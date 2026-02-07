@@ -30,7 +30,7 @@ const DashboardLayout = () => {
           <Route path="/" element={
             <div className="space-y-8">
               <StatsOverview />
-              <div className="h-[600px]">
+              <div className="h-150">
                  <AsteroidFeed />
               </div>
             </div>
