@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileInfo from '@/components/profile/ProfileInfo';
@@ -7,8 +6,7 @@ import SecuritySettings from '@/components/profile/SecuritySettings';
 import SessionInfo from '@/components/profile/SessionInfo';
 import DangerZone from '@/components/profile/DangerZone';
 import { Loader2 } from 'lucide-react';
-
-const API_BASE = import.meta.env.VITE_API_URI || 'http://localhost:5001';
+import { fetchCurrentUser } from '@/services/api';
 
 const Profile = () => {
   const { session } = useAuth();
@@ -16,16 +14,14 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const loadUser = async () => {
       if (!session?.access_token) {
         setLoading(false);
         return;
       }
 
       try {
-        const { data } = await axios.get(`${API_BASE}/me`, {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        });
+        const data = await fetchCurrentUser();
         setUser(data.user);
       } catch {
         // Fallback to session user if API fails
@@ -35,7 +31,7 @@ const Profile = () => {
       }
     };
 
-    fetchUser();
+    loadUser();
   }, [session]);
 
   if (loading) {

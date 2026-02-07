@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Activity, Server, RefreshCw, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-
-const API_BASE = import.meta.env.VITE_API_URI || 'http://localhost:5001';
+import { fetchHealth, fetchCurrentUser } from '@/services/api';
 
 const SessionInfo = () => {
   const { session } = useAuth();
@@ -22,19 +20,17 @@ const SessionInfo = () => {
     try {
       // Fetch health & /me in parallel
       const token = session?.access_token;
-      const [healthRes, meRes] = await Promise.all([
-        axios.get(`${API_BASE}/health`),
+      const [healthData, meResult] = await Promise.all([
+        fetchHealth(),
         token
-          ? axios.get(`${API_BASE}/me`, {
-              headers: { Authorization: `Bearer ${token}` },
-            })
+          ? fetchCurrentUser()
           : Promise.resolve(null),
       ]);
 
-      setApiHealth(healthRes.data);
-      if (meRes) setMeData(meRes.data);
+      setApiHealth(healthData);
+      if (meResult) setMeData(meResult);
     } catch (err) {
-      setError(err.response?.data?.error || err.message);
+      setError(err.message);
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard,
     Radar,
@@ -7,7 +8,6 @@ import {
     Bell,
     Globe2,
     MessageSquare,
-    Settings,
     ChevronLeft,
     ChevronRight,
     LogOut,
@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/context/AuthContext';
 
 const navItems = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -78,6 +79,16 @@ const Sidebar = ({ activeView, setActiveView, user, collapsed, setCollapsed, mob
 };
 
 const SidebarContent = ({ activeView, setActiveView, user, collapsed, setCollapsed, setMobileOpen, isMobile }) => {
+    const navigate = useNavigate();
+    const { signout } = useAuth();
+
+    const handleLogout = async () => {
+        const result = await signout();
+        if (result.success) {
+            navigate('/', { replace: true });
+        }
+    };
+
     return (
         <>
             {/* Logo Header */}
@@ -171,11 +182,17 @@ const SidebarContent = ({ activeView, setActiveView, user, collapsed, setCollaps
 
             {/* User Profile */}
             <div className="p-3">
-                <div className={`
-                    flex items-center gap-3 p-2 rounded-xl bg-white/5 border border-white/5
-                    ${collapsed ? 'justify-center' : ''}
-                `}>
-                    <Avatar className="w-9 h-9 border border-cyan-500/30">
+                <div
+                    onClick={() => navigate('/profile')}
+                    title="View Profile"
+                    className={`
+                        flex items-center gap-3 p-2 rounded-xl bg-white/5 border border-white/5
+                        cursor-pointer transition-all duration-200
+                        hover:bg-white/10 hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-500/5
+                        ${collapsed ? 'justify-center' : ''}
+                    `}
+                >
+                    <Avatar className="w-9 h-9 border border-cyan-500/30 transition-shadow duration-200 group-hover:shadow-md">
                         <AvatarImage src={user?.avatar} />
                         <AvatarFallback className="bg-gradient-to-br from-cyan-600 to-purple-600 text-white font-bold text-xs">
                             {user?.name?.charAt(0) || 'U'}
@@ -194,21 +211,13 @@ const SidebarContent = ({ activeView, setActiveView, user, collapsed, setCollaps
                     )}
                 </div>
 
-                {/* Settings & Logout */}
-                <div className={`flex mt-2 gap-1 ${collapsed ? 'flex-col' : ''}`}>
+                {/* Logout */}
+                <div className="mt-2">
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="flex-1 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg h-8"
-                        title="Settings"
-                    >
-                        <Settings className="w-4 h-4" />
-                        {!collapsed && <span className="ml-2 text-xs">Settings</span>}
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="flex-1 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg h-8"
+                        onClick={handleLogout}
+                        className={`w-full text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg h-8 ${collapsed ? 'justify-center px-0' : ''}`}
                         title="Logout"
                     >
                         <LogOut className="w-4 h-4" />
