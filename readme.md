@@ -65,26 +65,27 @@ git clone https://github.com/<your-username>/NEO-Monitoring.git
 cd NEO-Monitoring
 ```
 
-### 2a. Run with Docker (Recommended)
+### 2a. Run with Docker (Recommended — single command)
 
-Create a `.env` file in the project root:
-
-```env
-NASA_API_KEY=your_nasa_api_key
-JWT_SECRET=your_secret_key
-```
-
-Then start all services:
+1. Copy the example env and fill in your values:
 
 ```bash
-docker-compose up --build
+cp .env.example .env
+# Edit .env with your Supabase, NASA, and other credentials
 ```
 
-| Service  | URL                        |
-| -------- | -------------------------- |
-| Frontend | http://localhost           |
-| Backend  | http://localhost:5000      |
-| MongoDB  | mongodb://localhost:27017  |
+2. Boot up everything:
+
+```bash
+docker compose up --build
+```
+
+That's it — Redis, the Express API, and the React frontend all start automatically.
+
+| Service  | URL                   |
+| -------- | --------------------- |
+| Frontend | http://localhost      |
+| Backend  | http://localhost:5000 |
 
 ### 2b. Run Locally (Development)
 
@@ -120,9 +121,8 @@ npm run dev:client   # Vite on port 5173
 
 All services use **multi-stage builds** to minimise image size:
 
-- **server** — `node:22-alpine` build → production stage with non-root user
-- **client** — `node:22-alpine` build → `nginx:alpine` serving static assets
-- **mongo** — Official `mongo:7` image with a persistent volume
+- **server** — `node:22-alpine` build → production stage with non-root user; connects to your managed Redis via `REDIS_URL`
+- **client** — `node:22-alpine` build → `nginx:alpine` serving static assets (waits for server)
 
 Nginx reverse-proxies `/api/*` and `/socket.io/*` requests to the backend.
 
