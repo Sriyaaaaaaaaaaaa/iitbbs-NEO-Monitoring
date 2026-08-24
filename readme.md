@@ -180,6 +180,3 @@ database containers to worry about.
 
 ---
 
-## License
-
-MIT
